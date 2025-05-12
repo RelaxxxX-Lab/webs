@@ -1,0 +1,264 @@
+:root {
+    --primary-color: #5e35b1;
+    --secondary-color: #3949ab;
+    --accent-color: #7c4dff;
+    --dark-color: #1a237e;
+    --light-color: #e8eaf6;
+    --text-color: #333;
+    --text-light: #f5f5f5;
+    --highlight-color: #ffab00;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 0;
+}
+
+.highlight {
+    color: var(--highlight-color);
+}
+
+.btn {
+    display: inline-block;
+    padding: 0.8rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin: 0.5rem;
+}
+
+.btn.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn.primary:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.btn.secondary {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn.secondary:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.btn.outline {
+    border: 2px solid var(--primary-color);
+    color: var(--primary-color);
+    background: transparent;
+}
+
+.btn.outline:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+header {
+    background: linear-gradient(135deg, var(--dark-color), var(--primary-color));
+    color: white;
+    text-align: center;
+    padding: 4rem 0;
+}
+
+header h1 {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+header .subtitle {
+    font-size: 1.5rem;
+    margin-bottom: 2rem;
+    opacity: 0.9;
+}
+
+.hero {
+    text-align: center;
+    padding: 4rem 0;
+    background-color: var(--light-color);
+}
+
+.hero h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.hero p {
+    font-size: 1.2rem;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+}
+
+.features {
+    text-align: center;
+    padding: 4rem 0;
+    background-color: white;
+}
+
+.features h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.features p {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    font-size: 1.1rem;
+}
+
+.games {
+    text-align: center;
+    padding: 4rem 0;
+    background-color: var(--light-color);
+}
+
+.games h3 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.games p {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    font-size: 1.1rem;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.feature {
+    background: white;
+    padding: 2rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.feature h4 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+}
+
+.verify-section {
+    text-align: center;
+    padding: 4rem 0;
+    background-color: white;
+}
+
+.verify-section h2 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.verify-container {
+    max-width: 500px;
+    margin: 0 auto;
+    display: flex;
+    gap: 1rem;
+}
+
+#username-input {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+#result-container {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-radius: 4px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#result-container.success {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+}
+
+#result-container.error {
+    background-color: #ffebee;
+    color: #c62828;
+}
+
+.hidden {
+    display: none;
+}
+
+.stats {
+    background: linear-gradient(135deg, var(--dark-color), var(--primary-color));
+    color: white;
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.stats .container {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.stat {
+    padding: 1rem 2rem;
+}
+
+.stat h3 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+footer {
+    background-color: var(--dark-color);
+    color: white;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2.2rem;
+    }
+    
+    header .subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .hero h2, .features h2, .verify-section h2 {
+        font-size: 1.8rem;
+    }
+    
+    .verify-container {
+        flex-direction: column;
+    }
+    
+    #username-input, #verify-btn {
+        width: 100%;
+    }
+}
