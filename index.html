@@ -1,97 +1,187 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lua SS - The Ultimate Roblox Serverside</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Lua SS - O Melhor Serverside para Roblox</title>
+    <style>
+        :root {
+            --roxo: #6a1b9a;
+            --roxo-claro: #9c27b0;
+            --amarelo: #ffd600;
+            --cinza: #f5f5f5;
+            --preto: #212121;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        body {
+            background-color: var(--cinza);
+            color: var(--preto);
+            line-height: 1.6;
+        }
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 0;
+        }
+        header {
+            background: linear-gradient(135deg, var(--roxo), var(--roxo-claro));
+            color: white;
+            text-align: center;
+            padding: 60px 0;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .destaque {
+            color: var(--amarelo);
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            margin: 10px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-primario {
+            background: var(--amarelo);
+            color: var(--preto);
+        }
+        .btn-secundario {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+        }
+        section {
+            padding: 40px 0;
+            text-align: center;
+        }
+        #verificar {
+            background: white;
+        }
+        #verificar input {
+            padding: 10px;
+            width: 300px;
+            max-width: 80%;
+            margin-right: 10px;
+        }
+        #resultado {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .sucesso {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .erro {
+            background: #ffebee;
+            color: #c62828;
+        }
+        footer {
+            background: var(--preto);
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+        }
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .btn { display: block; margin: 10px auto; }
+            #verificar input { margin: 0 auto 10px; display: block; }
+        }
+    </style>
 </head>
 <body>
     <header>
         <div class="container">
-            <h1>Unleash the Power of <span class="highlight">Lua Serverside</span></h1>
-            <p class="subtitle">The Ultimate Server-side Solution for Roblox</p>
-            <div class="cta-buttons">
-                <a href="#pricing" class="btn primary">Buy Lua SS Now</a>
-                <a href="#showcases" class="btn secondary">View Showcases</a>
+            <h1>Desbloqueie o poder do <span class="destaque">Lua Serverside</span></h1>
+            <p>A solução definitiva para scripts server-side no Roblox</p>
+            <div>
+                <a href="#planos" class="btn btn-primario">Comprar Agora</a>
+                <a href="#demos" class="btn btn-secundario">Ver Demonstrações</a>
             </div>
         </div>
     </header>
 
-    <section class="hero">
+    <section>
         <div class="container">
-            <h2>The Best Roblox <span class="highlight">Serverside</span> on The Market</h2>
-            <p>We are a premium Roblox script executor that lets you perform a variety of unique features in games for a low price, no download required.</p>
-            <div class="cta-buttons">
-                <a href="#pricing" class="btn primary">Discover plans</a>
-                <a href="#verify" class="btn outline">Verify Whitelist</a>
-                <a href="#free-trial" class="btn secondary">Try for free</a>
+            <h2>O Melhor <span class="destaque">Serverside</span> do Mercado</h2>
+            <p>Executor de scripts premium para Roblox com diversos recursos exclusivos por um preço acessível, sem necessidade de downloads.</p>
+            <div>
+                <a href="#planos" class="btn btn-primario">Planos Disponíveis</a>
+                <a href="#verificar" class="btn btn-secundario">Verificar Whitelist</a>
             </div>
         </div>
     </section>
 
-    <section id="features" class="features">
+    <section id="verificar">
         <div class="container">
-            <h2>Full Web-based Experience</h2>
-            <p>Access our product directly from your browser! Execute scripts on all supported games, bypassing filtering, all without breaking any TOS. Experience seamless execution every time with our powerful tool.</p>
-            <a href="#pricing" class="btn primary">View Plans</a>
+            <h2>Verifique seu Status</h2>
+            <input type="text" id="username" placeholder="Seu nome de usuário no Roblox">
+            <button onclick="verificarUsuario()" class="btn btn-primario">Verificar</button>
+            <div id="resultado"></div>
         </div>
     </section>
 
-    <section class="games">
+    <section>
         <div class="container">
-            <h3>Large Games Library</h3>
-            <p>Access tens of thousands of games with a server-side plan at your fingertips.</p>
-            
-            <div class="features-grid">
-                <div class="feature">
-                    <h4>Bypass Protection</h4>
-                    <p>Since we aren't a cheat, you'll never have to worry about Roblox updates.</p>
-                </div>
-                <div class="feature">
-                    <h4>No Download</h4>
-                    <p>Execute all your favorite scripts directly from our website.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="verify" class="verify-section">
-        <div class="container">
-            <h2>Check Your Whitelist Status</h2>
-            <div class="verify-container">
-                <input type="text" id="username-input" placeholder="Enter your Roblox username">
-                <button id="verify-btn" class="btn primary">Verify</button>
-            </div>
-            <div id="result-container" class="hidden">
-                <p id="result-text"></p>
-            </div>
-        </div>
-    </section>
-
-    <section id="stats" class="stats">
-        <div class="container">
-            <div class="stat">
-                <h3>1000+</h3>
-                <p>Games logged</p>
-            </div>
-            <div class="stat">
-                <h3>190+</h3>
-                <p>Customers</p>
-            </div>
-            <div class="stat">
-                <h3>98%</h3>
-                <p>Satisfaction</p>
+            <h2>Recursos Exclusivos</h2>
+            <div style="margin-top: 30px; text-align: left; max-width: 800px; margin-left: auto; margin-right: auto;">
+                <p>✔️ Execução direta pelo navegador - sem downloads</p>
+                <p>✔️ Compatível com milhares de jogos</p>
+                <p>✔️ Proteção contra atualizações do Roblox</p>
+                <p>✔️ Whitelist para acesso exclusivo</p>
             </div>
         </div>
     </section>
 
     <footer>
         <div class="container">
-            <p>&copy; 2023 Lua Serverside. All rights reserved.</p>
+            <p>© 2023 Lua Serverside. Todos os direitos reservados.</p>
         </div>
     </footer>
 
-    <script src="script.js"></script>
+    <script>
+        async function verificarUsuario() {
+            const username = document.getElementById('username').value.trim();
+            const resultado = document.getElementById('resultado');
+            
+            if (!username) {
+                mostrarResultado('Por favor, insira um nome de usuário', 'erro');
+                return;
+            }
+
+            try {
+                const response = await fetch(`https://raw.githubusercontent.com/RelaxxxX-Lab/Lua-things/main/Whitelist.json`);
+                const data = await response.json();
+                const usuario = data.find(u => u.User.toLowerCase() === username.toLowerCase());
+                
+                if (usuario) {
+                    mostrarResultado(`Usuário: ${usuario.User}<br>Tier: ${usuario.Whitelist}`, 'sucesso');
+                } else {
+                    mostrarResultado('Usuário não encontrado na whitelist', 'erro');
+                }
+            } catch (error) {
+                mostrarResultado('Erro ao verificar. Tente novamente.', 'erro');
+                console.error(error);
+            }
+        }
+
+        function mostrarResultado(mensagem, tipo) {
+            const resultado = document.getElementById('resultado');
+            resultado.innerHTML = mensagem;
+            resultado.className = tipo;
+            resultado.style.display = 'block';
+        }
+    </script>
 </body>
 </html>
