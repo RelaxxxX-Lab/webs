@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lua Executor</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #1e1e2f;
+            color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: #2a2a3a;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+        
+        h1 {
+            color: #7289da;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .login-section, .executor-section {
+            display: none;
+        }
+        
+        .login-section.active, .executor-section.active {
+            display: block;
+        }
+        
+        .login-btn {
+            background-color: #7289da;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 0 auto;
+            transition: background-color 0.3s;
+        }
+        
+        .login-btn:hover {
+            background-color: #677bc4;
+        }
+        
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #3e3e4a;
+        }
+        
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+        }
+        
+        .user-details {
+            flex-grow: 1;
+        }
+        
+        .username {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .discord-id, .whitelist-status {
+            font-size: 14px;
+            color: #b9bbbe;
+        }
+        
+        .whitelist-status.verified {
+            color: #43b581;
+        }
+        
+        .whitelist-status.unverified {
+            color: #f04747;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            background-color: #2d2d3a;
+            border: 1px solid #3e3e4a;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Consolas', monospace;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #2d2d3a;
+            border: 1px solid #3e3e4a;
+            color: #ffffff;
+            border-radius: 5px;
+        }
+        
+        .execute-btn {
+            background-color: #43b581;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+        
+        .execute-btn:hover {
+            background-color: #3aa371;
+        }
+        
+        .execute-btn:disabled {
+            background-color: #747f8d;
+            cursor: not-allowed;
+        }
+        
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        
+        .status-message.success {
+            background-color: rgba(67, 181, 129, 0.2);
+            color: #43b581;
+        }
+        
+        .status-message.error {
+            background-color: rgba(240, 71, 71, 0.2);
+            color: #f04747;
+        }
+        
+        .logout-btn {
+            background-color: transparent;
+            color: #f04747;
+            border: 1px solid #f04747;
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: auto;
+            transition: background-color 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background-color: rgba(240, 71, 71, 0.1);
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Lua Executor</h1>
+        
+        <div id="loginSection" class="login-section active">
+            <button id="loginBtn" class="login-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"></path>
+                </svg>
+                Login with Discord
+            </button>
+        </div>
+        
+        <div id="executorSection" class="executor-section">
+            <div class="user-info">
+                <img id="userAvatar" class="user-avatar" src="" alt="User Avatar">
+                <div class="user-details">
+                    <div id="username" class="username"></div>
+                    <div id="discordId" class="discord-id"></div>
+                    <div id="whitelistStatus" class="whitelist-status"></div>
+                </div>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="robloxUsername">Roblox Username</label>
+                <input type="text" id="robloxUsername" placeholder="Enter Roblox username">
+            </div>
+            
+            <div class="form-group">
+                <label for="luaScript">Lua Script</label>
+                <textarea id="luaScript" placeholder="Enter your Lua script here..."></textarea>
+            </div>
+            
+            <button id="executeBtn" class="execute-btn" disabled>
+                <span id="executeBtnText">Execute</span>
+                <span id="executeBtnLoader" class="loading" style="display: none;"></span>
+            </button>
+            
+            <div id="statusMessage" class="status-message" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration from environment variables
+        const config = {
+            discord: {
+                clientId: process.env.BOT_CLIENT_ID || 'YOUR_CLIENT_ID',
+                redirectUri: window.location.origin,
+                scope: 'identify guilds guilds.members.read',
+                botToken: process.env.BOT_TOKEN || 'YOUR_BOT_TOKEN'
+            },
+            guildId: '1325936731383660584',
+            roles: {
+                STANDARD: '1330552089759191064',
+                PREMIUM: '1333286640248029264',
+                ULTIMATE: '1337177751202828300',
+                OWNER: '1330551770317066270',
+                MOD: '1330780991777804350',
+                ADMIN: '1330781286087921834',
+                HEAD_ADMIN: '1351255262232838287',
+                MANAGER: '1351255389601136742',
+                CCO: '1364279486891163748'
+            },
+            whitelistUrl: 'https://raw.githubusercontent.com/RelaxxxX-Lab/Lua-things/main/Whitelist.json',
+            apiUrl: 'https://luaserverside.onrender.com/queue/'
+        };
+
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const executorSection = document.getElementById('executorSection');
+        const loginBtn = document.getElementById('loginBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const executeBtn = document.getElementById('executeBtn');
+        const executeBtnText = document.getElementById('executeBtnText');
+        const executeBtnLoader = document.getElementById('executeBtnLoader');
+        const statusMessage = document.getElementById('statusMessage');
+        const usernameDisplay = document.getElementById('username');
+        const discordIdDisplay = document.getElementById('discordId');
+        const whitelistStatus = document.getElementById('whitelistStatus');
+        const userAvatar = document.getElementById('userAvatar');
+        const robloxUsernameInput = document.getElementById('robloxUsername');
+        const luaScriptInput = document.getElementById('luaScript');
+
+        // State
+        let userData = null;
+        let whitelistData = null;
+        let userHasAccess = false;
+
+        // Initialize the app
+        function init() {
+            checkToken();
+            setupEventListeners();
+        }
+
+        // Check for existing token in URL or localStorage
+        function checkToken() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const accessToken = params.get('access_token');
+            
+            if (accessToken) {
+                // Remove token from URL
+                window.history.pushState({}, document.title, window.location.pathname);
+                localStorage.setItem('discord_access_token', accessToken);
+                fetchUserData(accessToken);
+            } else if (localStorage.getItem('discord_access_token')) {
+                fetchUserData(localStorage.getItem('discord_access_token'));
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            loginBtn.addEventListener('click', startDiscordOAuth);
+            logoutBtn.addEventListener('click', logout);
+            executeBtn.addEventListener('click', executeScript);
+        }
+
+        // Start Discord OAuth flow
+        function startDiscordOAuth() {
+            const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${config.discord.clientId}&redirect_uri=${encodeURIComponent(config.discord.redirectUri)}&response_type=token&scope=${encodeURIComponent(config.discord.scope)}`;
+            window.location.href = authUrl;
+        }
+
+        // Logout user
+        function logout() {
+            localStorage.removeItem('discord_access_token');
+            userData = null;
+            userHasAccess = false;
+            toggleSections();
+            clearUserInfo();
+        }
+
+        // Toggle between login and executor sections
+        function toggleSections() {
+            if (userData && userHasAccess) {
+                loginSection.classList.remove('active');
+                executorSection.classList.add('active');
+            } else {
+                loginSection.classList.add('active');
+                executorSection.classList.remove('active');
+            }
+        }
+
+        // Clear user info display
+        function clearUserInfo() {
+            usernameDisplay.textContent = '';
+            discordIdDisplay.textContent = '';
+            whitelistStatus.textContent = '';
+            userAvatar.src = '';
+            robloxUsernameInput.value = '';
+            luaScriptInput.value = '';
+            executeBtn.disabled = true;
+            hideStatusMessage();
+        }
+
+        // Show status message
+        function showStatusMessage(message, isSuccess) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${isSuccess ? 'success' : 'error'}`;
+            statusMessage.style.display = 'block';
+        }
+
+        // Hide status message
+        function hideStatusMessage() {
+            statusMessage.style.display = 'none';
+        }
+
+        // Show loading state on execute button
+        function showLoading(show) {
+            executeBtn.disabled = show;
+            executeBtnText.style.display = show ? 'none' : 'inline';
+            executeBtnLoader.style.display = show ? 'inline-block' : 'none';
+        }
+
+        // Fetch user data from Discord
+        async function fetchUserData(accessToken) {
+            try {
+                showLoading(true);
+                
+                // Get basic user info
+                const userResponse = await axios.get('https://discord.com/api/users/@me', {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                
+                userData = userResponse.data;
+                
+                // Check guild membership and roles
+                const guildMemberResponse = await axios.get(`https://discord.com/api/users/@me/guilds/${config.guildId}/member`, {
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+                
+                const guildMemberData = guildMemberResponse.data;
+                userData.roles = guildMemberData.roles || [];
+                
+                // Check if user has any of the required roles
+                const requiredRoles = Object.values(config.roles);
+                userHasAccess = userData.roles.some(role => requiredRoles.includes(role));
+                
+                // Load whitelist data
+                await loadWhitelistData();
+                
+                // Check if user is in whitelist
+                const whitelistedUser = whitelistData.find(user => user.Discord === userData.id);
+                
+                // Update UI
+                updateUserInfo(whitelistedUser);
+                toggleSections();
+                
+                if (!userHasAccess) {
+                    showStatusMessage('You do not have the required Discord role to access this executor.', false);
+                } else if (!whitelistedUser) {
+                    showStatusMessage('Your Discord account is not whitelisted. Please contact support.', false);
+                } else {
+                    executeBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                showStatusMessage('Failed to authenticate with Discord. Please try again.', false);
+                logout();
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Load whitelist data from GitHub
+        async function loadWhitelistData() {
+            try {
+                const response = await axios.get(config.whitelistUrl);
+                whitelistData = response.data;
+            } catch (error) {
+                console.error('Error loading whitelist:', error);
+                showStatusMessage('Failed to load whitelist data. Please try again later.', false);
+                whitelistData = [];
+            }
+        }
+
+        // Update user info display
+        function updateUserInfo(whitelistedUser) {
+            usernameDisplay.textContent = `${userData.username}#${userData.discriminator}`;
+            discordIdDisplay.textContent = `ID: ${userData.id}`;
+            
+            if (userData.avatar) {
+                userAvatar.src = `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png`;
+            } else {
+                userAvatar.src = `https://cdn.discordapp.com/embed/avatars/${userData.discriminator % 5}.png`;
+            }
+            
+            if (whitelistedUser) {
+                whitelistStatus.textContent = `Whitelist: ${whitelistedUser.Whitelist} (${whitelistedUser.User})`;
+                whitelistStatus.className = 'whitelist-status verified';
+            } else {
+                whitelistStatus.textContent = 'Not whitelisted';
+                whitelistStatus.className = 'whitelist-status unverified';
+            }
+        }
+
+        // Execute script
+        async function executeScript() {
+            const robloxUsername = robloxUsernameInput.value.trim();
+            const script = luaScriptInput.value.trim();
+            
+            if (!robloxUsername) {
+                showStatusMessage('Please enter a Roblox username', false);
+                return;
+            }
+            
+            if (!script) {
+                showStatusMessage('Please enter a Lua script', false);
+                return;
+            }
+            
+            try {
+                showLoading(true);
+                hideStatusMessage();
+                
+                // Check if the Roblox username is whitelisted
+                const whitelistedUser = whitelistData.find(user => user.User.toLowerCase() === robloxUsername.toLowerCase());
+                
+                if (!whitelistedUser) {
+                    showStatusMessage('This Roblox username is not whitelisted', false);
+                    return;
+                }
+                
+                // Prepare the script data
+                const scriptData = [{
+                    Script: script
+                }];
+                
+                // Send to the API
+                const response = await axios.post(`${config.apiUrl}${robloxUsername}`, scriptData);
+                
+                if (response.data && response.data.status === 'success') {
+                    showStatusMessage(`Script successfully queued for ${robloxUsername}`, true);
+                    luaScriptInput.value = '';
+                } else {
+                    showStatusMessage('Failed to execute script. Please try again.', false);
+                }
+            } catch (error) {
+                console.error('Error executing script:', error);
+                showStatusMessage('Failed to execute script. Please try again.', false);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // Initialize the app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
