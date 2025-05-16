@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dashboard - Lua</title>
+  <script>
+    const user = new URLSearchParams(window.location.search).get('user');
+  </script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+</head>
+<body class="bg-gray-800 text-white p-8">
+  <div class="max-w-2xl mx-auto">
+    <h1 class="text-3xl font-bold mb-4">Executar Script - <span id="username"></span></h1>
+    <form id="executor" class="space-y-4">
+      <textarea id="script" rows="10" class="w-full p-4 rounded bg-gray-700"></textarea>
+      <button class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded">Executar</button>
+    </form>
+    <p id="response" class="mt-4"></p>
+  </div>
+  <script>
+    const username = new URLSearchParams(location.search).get('user');
+    document.getElementById('username').textContent = username;
+
+    document.getElementById('executor').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const script = document.getElementById('script').value;
+
+      const res = await fetch('/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, script })
+      });
+
+      document.getElementById('response').textContent = await res.text();
+    });
+  </script>
+</body>
+</html>
