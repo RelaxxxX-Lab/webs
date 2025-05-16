@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lua - Web Executor</title>
+    <style>
+        :root {
+            --primary: #6e45e2;
+            --secondary: #88d3ce;
+            --dark: #121218;
+            --darker: #0a0a0f;
+            --light: #f0f0f0;
+            --gray: #2a2a35;
+            --sidebar-width: 250px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--darker);
+            color: var(--light);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--dark), var(--darker));
+            padding: 20px 0;
+            height: 100vh;
+            position: fixed;
+            box-shadow: 5px 0 15px rgba(0, 0, 0, 0.3);
+            z-index: 100;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 0 20px;
+        }
+
+        .logo h1 {
+            font-size: 28px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            margin-right: 10px;
+            font-size: 24px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin: 5px 0;
+            position: relative;
+        }
+
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 4px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+            border-radius: 0 4px 4px 0;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: var(--light);
+            text-decoration: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            margin: 0 10px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link.active {
+            background: rgba(110, 69, 226, 0.15);
+        }
+
+        .nav-link i {
+            margin-right: 12px;
+            font-size: 18px;
+        }
+
+        /* Main Content Styles */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            padding: 30px;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .page-title h2 {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-profile img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        /* Executor Container */
+        .executor-container {
+            background: linear-gradient(145deg, var(--dark), var(--gray));
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .editor-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .editor-title {
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 5px;
+            border: none;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(110, 69, 226, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .code-editor {
+            width: 100%;
+            min-height: 200px;
+            background: #1e1e2a;
+            border-radius: 5px;
+            padding: 15px;
+            color: #f8f8f2;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+
+        .output-container {
+            background: #1e1e2a;
+            border-radius: 5px;
+            padding: 15px;
+            min-height: 100px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            color: #f8f8f2;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(145deg, var(--dark), var(--gray));
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-title {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 600;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        /* Script Hub */
+        .scripts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .script-card {
+            background: linear-gradient(145deg, var(--dark), var(--gray));
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .script-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .script-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .script-desc {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .script-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .script-author {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .script-author img {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .logo h1, .nav-link span {
+                display: none;
+            }
+            
+            .logo {
+                justify-content: center;
+            }
+            
+            .nav-link {
+                justify-content: center;
+                margin: 0 5px;
+            }
+            
+            .nav-link i {
+                margin-right: 0;
+                font-size: 20px;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <span class="logo-icon"><i class="fas fa-code"></i></span>
+            <h1>Lua</h1>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active">
+                <a href="#" class="nav-link active">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-gamepad"></i>
+                    <span>Game Logs</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-box-open"></i>
+                    <span>Scripthub</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-terminal"></i>
+                    <span>Executor</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Profile</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <div class="page-title">
+                <h2>Dashboard</h2>
+            </div>
+            <div class="user-profile">
+                <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+                <span>Admin</span>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-title">Total Executions</div>
+                <div class="stat-value">1,248</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Active Scripts</div>
+                <div class="stat-value">24</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Games Supported</div>
+                <div class="stat-value">18</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-title">Community Scripts</div>
+                <div class="stat-value">156</div>
+            </div>
+        </div>
+
+        <!-- Executor -->
+        <div class="executor-container">
+            <div class="editor-toolbar">
+                <div class="editor-title">Lua Executor</div>
+                <div class="editor-actions">
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-file-import"></i> Import
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-play"></i> Execute
+                    </button>
+                </div>
+            </div>
+            <textarea class="code-editor" placeholder="-- Write your Lua script here...&#10;print('Hello, Lua!')"></textarea>
+            <div class="output-container">
+                <div class="output-title">Output</div>
+                <div class="output-content">> Ready to execute scripts...</div>
+            </div>
+        </div>
+
+        <!-- Script Hub Preview -->
+        <div class="header">
+            <div class="page-title">
+                <h2>Featured Scripts</h2>
+            </div>
+            <a href="#" class="btn btn-secondary">View All</a>
+        </div>
+
+        <div class="scripts-container">
+            <div class="script-card">
+                <div class="script-title">Infinite Yield</div>
+                <div class="script-desc">The most popular admin script with hundreds of commands for moderation and fun.</div>
+                <div class="script-footer">
+                    <div class="script-author">
+                        <img src="https://randomuser.me/api/portraits/men/22.jpg" alt="Author">
+                        <span>ScriptGod</span>
+                    </div>
+                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                        <i class="fas fa-download"></i> Get
+                    </button>
+                </div>
+            </div>
+            <div class="script-card">
+                <div class="script-title">Auto Farm</div>
+                <div class="script-desc">Automatically farms resources in your favorite games with customizable settings.</div>
+                <div class="script-footer">
+                    <div class="script-author">
+                        <img src="https://randomuser.me/api/portraits/women/33.jpg" alt="Author">
+                        <span>FarmQueen</span>
+                    </div>
+                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                        <i class="fas fa-download"></i> Get
+                    </button>
+                </div>
+            </div>
+            <div class="script-card">
+                <div class="script-title">ESP & Aimbot</div>
+                <div class="script-desc">Advanced player ESP with customizable aimbot for competitive advantage.</div>
+                <div class="script-footer">
+                    <div class="script-author">
+                        <img src="https://randomuser.me/api/portraits/men/45.jpg" alt="Author">
+                        <span>ProGamer</span>
+                    </div>
+                    <button class="btn btn-primary" style="padding: 5px 10px; font-size: 12px;">
+                        <i class="fas fa-download"></i> Get
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Simple script to handle active nav items
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+                this.parentElement.classList.add('active');
+                
+                // Update page title based on clicked nav item
+                const pageTitle = this.querySelector('span').textContent;
+                document.querySelector('.page-title h2').textContent = pageTitle;
+            });
+        });
+
+        // Execute button functionality
+        const executeBtn = document.querySelector('.btn-primary');
+        const codeEditor = document.querySelector('.code-editor');
+        const outputContent = document.querySelector('.output-content');
+        
+        executeBtn.addEventListener('click', function() {
+            const code = codeEditor.value;
+            if (code.trim() === '') {
+                outputContent.textContent = "> Please write some code to execute.";
+                return;
+            }
+            
+            outputContent.textContent = "> Executing script...\n";
+            
+            // Simulate execution (in a real app, this would communicate with your backend)
+            setTimeout(() => {
+                try {
+                    // This is just a simulation - in a real app you'd need proper Lua execution
+                    if (code.includes('print(')) {
+                        const matches = code.match(/print\(([^)]+)\)/);
+                        if (matches && matches[1]) {
+                            outputContent.textContent += `> ${matches[1].replace(/['"]/g, '')}\n`;
+                        } else {
+                            outputContent.textContent += "> Script executed successfully (simulated)\n";
+                        }
+                    } else {
+                        outputContent.textContent += "> Script executed successfully (simulated)\n";
+                    }
+                } catch (e) {
+                    outputContent.textContent += `> Error: ${e.message}\n`;
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
