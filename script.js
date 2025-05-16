@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // Simulate loading progress
     const loadingBar = document.getElementById('loadingBar');
-    const loadingText = document.querySelector('.loading-text');
+    const loadingText = document.getElementById('loadingText');
     const loadingScreen = document.getElementById('loadingScreen');
     const mainContent = document.getElementById('mainContent');
     const accessDenied = document.getElementById('accessDenied');
@@ -29,11 +29,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             credentials: 'include'
         });
         
-        const authData = await authResponse.json();
-        
         if (!authResponse.ok) {
-            throw new Error(authData.error || 'Authentication failed');
+            const errorData = await authResponse.json();
+            throw new Error(errorData.error || 'Authentication failed');
         }
+        
+        const authData = await authResponse.json();
         
         // Update UI with user data
         const userAvatar = document.getElementById('userAvatar');
@@ -72,6 +73,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.location.href = '/dashboard';
                 });
             }
+            
+            // Initialize tab system if on a page with tabs
+            initTabSystem();
         }, 2000);
     } catch (error) {
         console.error('Authentication error:', error);
@@ -83,26 +87,43 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Tab system for dashboard and other pages
-function openTab(evt, tabName) {
-    const tabContents = document.getElementsByClassName('tab-content');
-    for (let i = 0; i < tabContents.length; i++) {
-        tabContents[i].style.display = 'none';
-    }
+function initTabSystem() {
+    const tabLinks = document.querySelectorAll('.tab-link');
+    const tabContents = document.querySelectorAll('.tab-content');
     
-    const tabLinks = document.getElementsByClassName('tab-link');
-    for (let i = 0; i < tabLinks.length; i++) {
-        tabLinks[i].className = tabLinks[i].className.replace(' active', '');
+    if (tabLinks.length > 0 && tabContents.length > 0) {
+        // Show first tab by default
+        tabLinks[0].classList.add('active');
+        tabContents[0].classList.add('active');
+        
+        tabLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const tabName = link.getAttribute('data-tab');
+                
+                // Remove active class from all tabs
+                tabLinks.forEach(tab => tab.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+                
+                // Add active class to clicked tab
+                link.classList.add('active');
+                document.getElementById(tabName).classList.add('active');
+            });
+        });
     }
-    
-    document.getElementById(tabName).style.display = 'block';
-    evt.currentTarget.className += ' active';
 }
 
-// Initialize first tab as active by default
-document.addEventListener('DOMContentLoaded', function() {
-    const firstTab = document.querySelector('.tab-link');
-    if (firstTab) {
-        firstTab.click();
+// Function to open specific tab from URL hash
+function openTabFromHash() {
+    const hash = window.location.hash.substring(1);
+    if (hash) {
+        const tabLink = document.querySelector(`.tab-link[data-tab="${hash}"]`);
+        if (tabLink) {
+            tabLink.click();
+        }
     }
-});
+}
+
+// Initialize tab system when DOM is loaded
+document.addEventListener('DOMContentLoaded', initTabSystem);
+window.addEventListener('hashchange', openTabFromHash);
