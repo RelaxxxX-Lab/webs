@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Executor</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-800 text-white p-10">
+  <div class="max-w-xl mx-auto">
+    <h1 class="text-2xl mb-4 font-bold">Executor de Scripts</h1>
+    <form id="form">
+      <textarea id="script" rows="10" class="w-full p-4 rounded bg-gray-700 mb-4" placeholder="Digite seu script aqui..."></textarea>
+      <button class="bg-green-500 px-6 py-2 rounded hover:bg-green-600">Executar</button>
+    </form>
+    <p id="resp" class="mt-4"></p>
+  </div>
+
+  <script>
+    const user = new URLSearchParams(location.search).get('user');
+    document.getElementById('form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const script = document.getElementById('script').value;
+      const res = await fetch('/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: user, script })
+      });
+      const text = await res.text();
+      document.getElementById('resp').innerText = text;
+    });
+  </script>
+</body>
+</html>
