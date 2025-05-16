@@ -4,29 +4,85 @@
   <meta charset="UTF-8">
   <title>Executor</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <style>
+    .glow {
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.6), 0 0 20px rgba(34, 197, 94, 0.4);
+    }
+    .loading {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+  </style>
 </head>
-<body class="bg-gray-800 text-white p-10">
-  <div class="max-w-xl mx-auto">
-    <h1 class="text-2xl mb-4 font-bold">Executor de Scripts</h1>
-    <form id="form">
-      <textarea id="script" rows="10" class="w-full p-4 rounded bg-gray-700 mb-4" placeholder="Digite seu script aqui..."></textarea>
-      <button class="bg-green-500 px-6 py-2 rounded hover:bg-green-600">Executar</button>
+<body class="bg-gradient-to-b from-gray-800 to-gray-900 text-white p-8 min-h-screen">
+  <div class="max-w-xl mx-auto p-6 bg-gray-800 rounded-lg shadow-xl">
+    <h1 class="text-3xl mb-6 font-extrabold text-center">💻 Executor de Scripts</h1>
+
+    <!-- Formulário -->
+    <form id="form" class="space-y-4">
+      <textarea id="script" rows="8" 
+        class="w-full p-4 rounded bg-gray-700 text-white border-2 border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500 placeholder-gray-400 transition" 
+        placeholder="Digite seu script aqui..."></textarea>
+      <div class="text-center">
+        <button id="executeBtn" type="submit" 
+          class="bg-green-500 px-6 py-2 rounded glow hover:bg-green-600 transition-all ease-in-out duration-200">
+          Executar
+        </button>
+      </div>
     </form>
-    <p id="resp" class="mt-4"></p>
+
+    <!-- Mensagem de resposta -->
+    <p id="resp" class="mt-6 text-center text-lg font-medium"></p>
   </div>
 
+  <!-- Scripts -->
   <script>
     const user = new URLSearchParams(location.search).get('user');
-    document.getElementById('form').addEventListener('submit', async e => {
+    const form = document.getElementById('form');
+    const executeBtn = document.getElementById('executeBtn');
+    const resp = document.getElementById('resp');
+
+    form.addEventListener('submit', async e => {
       e.preventDefault();
-      const script = document.getElementById('script').value;
-      const res = await fetch('/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: user, script })
-      });
-      const text = await res.text();
-      document.getElementById('resp').innerText = text;
+      const script = document.getElementById('script').value.trim();
+
+      // Validação simples
+      if (!script) {
+        resp.textContent = 'Por favor, insira um script.';
+        resp.className = 'mt-6 text-center text-red-400 font-semibold';
+        return;
+      }
+
+      // Estado de carregamento
+      executeBtn.disabled = true;
+      executeBtn.classList.add('loading');
+      executeBtn.innerHTML = `<svg class="inline w-5 h-5 animate-spin mr-2 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0116 0h-2a6 6 0 10-12 0h2z"></path>
+      </svg>Executando...`;
+
+      try {
+        const res = await fetch('/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: user, script })
+        });
+
+        const text = await res.text();
+        resp.textContent = text;
+        resp.className = res.ok ? 'mt-6 text-center text-green-400 font-semibold' : 'mt-6 text-center text-red-400 font-semibold';
+      } catch (error) {
+        resp.textContent = 'Erro ao enviar script. Tente novamente.';
+        resp.className = 'mt-6 text-center text-red-400 font-semibold';
+      } finally {
+        // Resetar botão
+        executeBtn.disabled = false;
+        executeBtn.classList.remove('loading');
+        executeBtn.innerHTML = 'Executar';
+      }
     });
   </script>
 </body>
