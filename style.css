@@ -259,6 +259,40 @@ body {
     gap: 20px;
 }
 
+/* Tab System */
+.tab-container {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tab-link {
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-link:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.tab-link.active {
+    border-bottom: 3px solid var(--primary-color);
+    color: var(--primary-color);
+}
+
+.tab-content {
+    display: none;
+    padding: 20px;
+    background-color: var(--card-color);
+    border-radius: 8px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar {
@@ -269,6 +303,8 @@ body {
     
     .nav-links {
         gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
     
     .hero-section h1 {
@@ -282,5 +318,9 @@ body {
     
     .features-section {
         grid-template-columns: 1fr;
+    }
+    
+    .tab-container {
+        flex-direction: column;
     }
 }
