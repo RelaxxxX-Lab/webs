@@ -5,12 +5,33 @@
   <title>Lua Executor</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <style>
+    .neon-text {
+      color: #ffffff;
+      text-shadow: 0 0 8px #6d28d9, 0 0 12px #6d28d9, 0 0 16px #6d28d9, 0 0 20px #6d28d9;
+    }
+    .neon-button {
+      background-color: #6d28d9;
+      color: #fff;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(109, 40, 217, 0.6);
+    }
+    .neon-button:hover {
+      background-color: #8b5cf6;
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.7);
+      transform: translateY(-3px);
+    }
+    .neon-button:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 10px rgba(109, 40, 217, 0.4);
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-white h-screen flex justify-center items-center">
   <div class="text-center animate__animated animate__fadeInDown">
-    <h1 class="text-4xl font-bold mb-4">Lua Executor</h1>
-    <p class="mb-6">Clique abaixo para autenticar via Discord</p>
-    <a href="/login" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 rounded-lg text-lg transition">Login com Discord</a>
+    <h1 class="text-5xl font-extrabold mb-6 neon-text">Lua Executor</h1>
+    <p class="mb-8 text-lg text-gray-300">Execute scripts Lua com facilidade e autenticidade.</p>
+    <a href="/login" class="neon-button px-8 py-3 text-lg rounded-lg inline-block">Login com Discord</a>
   </div>
 </body>
 </html>
