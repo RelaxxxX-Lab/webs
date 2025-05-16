@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         loadingText.textContent = "Authentication failed. Redirecting...";
         
         setTimeout(() => {
-            window.location.href = 'https://discord.gg/lua';
+            window.location.href = 'https://discord.gg/Cp7k85xZwA';
         }, 2000);
     }
 });
