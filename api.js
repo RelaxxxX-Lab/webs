@@ -50,7 +50,26 @@ async function checkUserRoles(userId) {
         
         const memberData = await response.json();
         const requiredRoles = ['Staff', 'Whitelisted', 'VIP']; // Example roles
-        return memberData.roles && memberData.roles.some(role => requiredRoles.includes(role));
+        
+        // Get all roles from the server
+        const rolesResponse = await fetch(`https://discord.com/api/guilds/${SERVER_ID}/roles`, {
+            headers: {
+                'Authorization': `Bot ${BOT_TOKEN}`
+            }
+        });
+        
+        if (!rolesResponse.ok) return false;
+        
+        const allRoles = await rolesResponse.json();
+        const roleNames = {};
+        allRoles.forEach(role => {
+            roleNames[role.id] = role.name;
+        });
+        
+        // Check if user has any of the required roles
+        return memberData.roles && memberData.roles.some(roleId => 
+            requiredRoles.includes(roleNames[roleId])
+        );
     } catch (err) {
         console.error('Discord roles check error:', err);
         return false;
@@ -144,5 +163,42 @@ router.get('/admin/users', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+async function checkUserHasRole(userId, roleName) {
+    try {
+        const response = await fetch(`https://discord.com/api/guilds/${SERVER_ID}/members/${userId}`, {
+            headers: {
+                'Authorization': `Bot ${BOT_TOKEN}`
+            }
+        });
+        
+        if (!response.ok) return false;
+        
+        const memberData = await response.json();
+        
+        // Get all roles from the server
+        const rolesResponse = await fetch(`https://discord.com/api/guilds/${SERVER_ID}/roles`, {
+            headers: {
+                'Authorization': `Bot ${BOT_TOKEN}`
+            }
+        });
+        
+        if (!rolesResponse.ok) return false;
+        
+        const allRoles = await rolesResponse.json();
+        const roleNames = {};
+        allRoles.forEach(role => {
+            roleNames[role.id] = role.name;
+        });
+        
+        // Check if user has the specified role
+        return memberData.roles && memberData.roles.some(roleId => 
+            roleNames[roleId] === roleName
+        );
+    } catch (err) {
+        console.error('Role check error:', err);
+        return false;
+    }
+}
 
 module.exports = router;
