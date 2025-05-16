@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lua Executor</title>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@widgetbot/discord-oauth2@1.0.0/dist/discord-oauth2.min.js"></script>
     <style>
+        /* (Mantemos os mesmos estilos do anterior) */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #1e1e2f;
@@ -297,17 +299,9 @@
 
         // Check for existing token in URL or localStorage
         function checkToken() {
-            const hash = window.location.hash.substring(1);
-            const params = new URLSearchParams(hash);
-            const accessToken = params.get('access_token');
-            
-            if (accessToken) {
-                // Remove token from URL
-                window.history.pushState({}, document.title, window.location.pathname);
-                localStorage.setItem('discord_access_token', accessToken);
-                fetchUserData(accessToken);
-            } else if (localStorage.getItem('discord_access_token')) {
-                fetchUserData(localStorage.getItem('discord_access_token'));
+            const token = localStorage.getItem('discord_token');
+            if (token) {
+                verifyToken(token);
             }
         }
 
@@ -324,9 +318,63 @@
             window.location.href = authUrl;
         }
 
+        // Verify token with Discord API
+        async function verifyToken(token) {
+            try {
+                showLoading(true);
+                
+                // Get user info
+                const userResponse = await axios.get('https://discord.com/api/users/@me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                userData = userResponse.data;
+                
+                // Get guild member info
+                const guildMemberResponse = await axios.get(`https://discord.com/api/users/@me/guilds/${config.guildId}/member`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const guildMemberData = guildMemberResponse.data;
+                userData.roles = guildMemberData.roles || [];
+                
+                // Check if user has any of the required roles
+                const requiredRoles = Object.values(config.roles);
+                userHasAccess = userData.roles.some(role => requiredRoles.includes(role));
+                
+                // Load whitelist data
+                await loadWhitelistData();
+                
+                // Check if user is in whitelist
+                const whitelistedUser = whitelistData.find(user => user.Discord === userData.id);
+                
+                // Update UI
+                updateUserInfo(whitelistedUser);
+                toggleSections();
+                
+                if (!userHasAccess) {
+                    showStatusMessage('You do not have the required Discord role to access this executor.', false);
+                } else if (!whitelistedUser) {
+                    showStatusMessage('Your Discord account is not whitelisted. Please contact support.', false);
+                } else {
+                    executeBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error verifying token:', error);
+                showStatusMessage('Failed to authenticate with Discord. Please login again.', false);
+                logout();
+            } finally {
+                showLoading(false);
+            }
+        }
+
         // Logout user
         function logout() {
-            localStorage.removeItem('discord_access_token');
+            localStorage.removeItem('discord_token');
             userData = null;
             userHasAccess = false;
             toggleSections();
@@ -373,60 +421,6 @@
             executeBtn.disabled = show;
             executeBtnText.style.display = show ? 'none' : 'inline';
             executeBtnLoader.style.display = show ? 'inline-block' : 'none';
-        }
-
-        // Fetch user data from Discord
-        async function fetchUserData(accessToken) {
-            try {
-                showLoading(true);
-                
-                // Get basic user info
-                const userResponse = await axios.get('https://discord.com/api/users/@me', {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-                
-                userData = userResponse.data;
-                
-                // Check guild membership and roles
-                const guildMemberResponse = await axios.get(`https://discord.com/api/users/@me/guilds/${config.guildId}/member`, {
-                    headers: {
-                        'Authorization': `Bearer ${accessToken}`
-                    }
-                });
-                
-                const guildMemberData = guildMemberResponse.data;
-                userData.roles = guildMemberData.roles || [];
-                
-                // Check if user has any of the required roles
-                const requiredRoles = Object.values(config.roles);
-                userHasAccess = userData.roles.some(role => requiredRoles.includes(role));
-                
-                // Load whitelist data
-                await loadWhitelistData();
-                
-                // Check if user is in whitelist
-                const whitelistedUser = whitelistData.find(user => user.Discord === userData.id);
-                
-                // Update UI
-                updateUserInfo(whitelistedUser);
-                toggleSections();
-                
-                if (!userHasAccess) {
-                    showStatusMessage('You do not have the required Discord role to access this executor.', false);
-                } else if (!whitelistedUser) {
-                    showStatusMessage('Your Discord account is not whitelisted. Please contact support.', false);
-                } else {
-                    executeBtn.disabled = false;
-                }
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-                showStatusMessage('Failed to authenticate with Discord. Please try again.', false);
-                logout();
-            } finally {
-                showLoading(false);
-            }
         }
 
         // Load whitelist data from GitHub
@@ -510,8 +504,25 @@
             }
         }
 
+        // Handle OAuth callback
+        function handleOAuthCallback() {
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash);
+            const token = params.get('access_token');
+            
+            if (token) {
+                // Remove token from URL
+                window.history.pushState({}, document.title, window.location.pathname);
+                localStorage.setItem('discord_token', token);
+                verifyToken(token);
+            }
+        }
+
         // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            handleOAuthCallback();
+        });
     </script>
 </body>
 </html>
