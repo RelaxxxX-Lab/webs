@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "server.js"
+    }
+  ],
+  "env": {
+    "BOT_TOKEN": "@bot_token",
+    "BOT_CLIENT_ID": "@bot_client_id",
+    "BOT_CLIENT_SECRET": "@bot_client_secret",
+    "BOT_PUBLIC_KEY": "@bot_public_key",
+    "SERVER_ID": "@server_id",
+    "MONGODB_KEYS_URL": "@mongodb_keys_url",
+    "GITHUB_TOKEN": "@github_token",
+    "SESSION_SECRET": "@session_secret"
+  }
+}
