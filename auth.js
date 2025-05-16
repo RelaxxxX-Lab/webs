@@ -1,4 +1,4 @@
-const { fetchDiscordUser, checkUserRoles } = require('./api');
+const { fetchDiscordUser, checkUserRoles, checkUserHasRole } = require('./api');
 
 async function authenticate(req, res, next) {
     try {
@@ -34,4 +34,17 @@ async function checkAccess(req, res, next) {
     }
 }
 
-module.exports = { authenticate, checkAccess };
+async function checkStaff(req, res, next) {
+    try {
+        const isStaff = await checkUserHasRole(req.user.id, 'Staff');
+        if (!isStaff) {
+            return res.status(403).send('Forbidden');
+        }
+        next();
+    } catch (err) {
+        console.error('Staff check error:', err);
+        res.status(500).send('Internal server error');
+    }
+}
+
+module.exports = { authenticate, checkAccess, checkStaff };
